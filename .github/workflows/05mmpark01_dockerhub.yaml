@@ -19,7 +19,7 @@ jobs:
            password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: docker operations
-        run: 
+        run: |
            docker build -t ${{ secrets.DOCKER_USERNAME }}/massai_mara:v1 .
            docker push ${{ secrets.DOCKER_PASSWORD }}/massai_mara:v1 .
       
