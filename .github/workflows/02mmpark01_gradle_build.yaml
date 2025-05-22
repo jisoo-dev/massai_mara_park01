@@ -19,7 +19,7 @@ jobs:
            uses: gradle/actions/setup-gradle@v4
 
          - name: grant execute permission
-           run: chmod  +x  grradlew
+           run: chmod  +x  gradlew
 
          - name: build with gradle
            run: ./gradlew clean build
