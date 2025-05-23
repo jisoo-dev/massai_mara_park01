@@ -31,7 +31,7 @@ jobs:
 
                 ssh -vvv -o StrictHostKeyChecking=no \
                 -O "UserKnownHostsFile=/dev/null" \
-                -i ~/.ssh/clouds2025_new.pem -p 12138 \
+                -i ~/.ssh/clouds2025_new.pem -p 22 \
                 ${{env.EC2_USERNAME}}@${{env.EC2_HOSTNAME}} '
                     echo "현재 사용자: $(whoami)"'
                     echo "호스트명: $(hostname)"
@@ -50,7 +50,7 @@ jobs:
                  scp -i ~/.ssh/clouds2025_new.pem \
                  -o "StrictHostKeyChecking=no" \
                  -o "UserKnownHostsFile=/dev/null" \
-                 -P 12138  README.md \
+                 -P 22  README.md \
                  ${{env.EC2_USERNAME}}@${{env.EC2_HOSTNAME}}:~/
 
 
