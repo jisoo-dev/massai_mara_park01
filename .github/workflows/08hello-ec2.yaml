@@ -3,6 +3,9 @@ name: Test EC2 Connection with GHA
 on:
     workflow_dispatch
 
+env:
+    EC2_HOSTNAME: 3.36.68.26
+    EC2_USERNAME: ubuntu
 jobs:
     testec2-connet:
         name: test-ec2-connect
@@ -16,31 +19,43 @@ jobs:
     
             - name: make private key file
               run: |
-                echo "${{ secrets.EC2_PRIVATEKEY}}" > ~/.ssh/ec2_key
-                chmod 600 ~/.ssh/ec2_key
+                echo "${{ secrets.EC2_PRIVATEKEY}}" > ~/.ssh/authorized_keys
+                chmod 600 ~/.ssh/authorized_keys
 
             - name: test SSH connect to EC2
               env: 
-                HOSTNAME: "3.36.68.26"
-                USER_NAME: "ubuntu"
+                EC2_HOSTNAME: "3.36.68.26"
+                EC2_USERNAME: "ubuntu"
               run: |
                 echo "SSH 연결 테스트 시작...."
 
                 ssh -vvv -o StrictHostKeyChecking=no \
                 -O "UserKnownHostsFile=/dev/null" \
-                -i ~/.ssh/ec2_key -p 22 \
-                ${USER_NAME}@${HOSTNAME} '
-                    echo "현재 사용자: $(whoami)"
+                -i ~/.ssh/authorized_keys -p 22 \
+                ${env.EC2_USERNAME}@${env.EC2_HOSTNAME} '
+                    echo "현재 사용자: $(whoami)"'
                     echo "호스트명: $(hostname)"
                     echo "현재시간: $(date)"
                     echo "메모리 사용량" 
-                    free -h
-                EOF
+                    free -h                
                 '
 
+                
+
                 echo "SSH 연결 테스트 종료...."
-            
+            - name: upload README.md vis SCP
+              run: | 
+                 echo "Hello, EC2SCP" > README.md
+
+                 scp -i ~/.ssh/authorized_keys \
+                 -o "StrictHostKeyChecking=no" \
+                 -o "UserKnownHostsFile=/dev/null" \
+                 -P 22  README.md \
+                 ${env.EC2_USERNAME}@${env.EC2_HOSTNAME}:~/
+
+
+
             - name: Cleanup private key
               if: always()
               run: |
-                rm -f ~/.ssh/ec2_key
+                rm -f ~/.ssh/authorized_keys
