@@ -13,3 +13,6 @@
 [![massai mara park 01 dockerhub](https://github.com/jisoo-dev/massai_mara_park01/actions/workflows/05mmpark01_dockerhub.yaml/badge.svg)](https://github.com/jisoo-dev/massai_mara_park01/actions/workflows/05mmpark01_dockerhub.yaml)
 
 [![massai mara park 01 dockerhub](https://github.com/jisoo-dev/massai_mara_park01/actions/workflows/05mmpark01_dockerhub.yaml/badge.svg)](https://github.com/jisoo-dev/massai_mara_park01/actions/workflows/05mmpark01_dockerhub.yaml)
+
+[![massai mara park 01 compose dockerhub multiplejobs](https://github.com/jisoo-dev/massai_mara_park01/actions/workflows/07mmpark01_compose_dockerhub_multiplejobs.yaml/badge.svg)](https://github.com/jisoo-dev/massai_mara_park01/actions/workflows/07mmpark01_compose_dockerhub_multiplejobs.yaml)
+
