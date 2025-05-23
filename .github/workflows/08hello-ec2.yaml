@@ -21,8 +21,8 @@ jobs:
 
             - name: test SSH connect to EC2
               env: 
-                HOSTNAME: 3.36.68.26
-                USER_NAME: ubuntu
+                HOSTNAME: "3.36.68.26"
+                USER_NAME: "ubuntu"
               run: |
                 echo "SSH 연결 테스트 시작...."
 
