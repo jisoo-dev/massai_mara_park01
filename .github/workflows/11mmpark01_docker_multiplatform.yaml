@@ -1,4 +1,4 @@
-name: massai mara park 01 docker ec2
+name: massai mara park 01 docker multiplaform 
 
 on:
   workflow_dispatch
@@ -17,77 +17,47 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        
-      - name: setup docker buildx
-        uses: docker/setup-buildx-action@v3
 
-      # arm64 에뮬레이션 - QEmu 
-      - name: setup QEMU
-        uses: docker/setup-qemu-action@v3 
-        with:
-          platforms: linux/amd64,linux/arm64        
-
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/arm64
-          push: false
-          load: true
-          tags: ${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: check image
-        run: |
-          docker image ls
-
-      - name: save docker image
-        run: |
-          docker save ${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:arm64 > image.tar   
-
-      - name: Upload image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image
-          path: image.tar
-
-  hub_push:
-    needs: build_image
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: download JAR artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image
-
-      - name: check downloaded image
-        run: ls -al
-
-      - name: load docker image
-        run: |
-          docker load < image.tar
-      
       - name: login to docker hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }} 
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: docker operations
-        run: |       
-          docker  push  ${{env.DOCKER_USERNAME}}/${{env.IMAGE_NAME}}:arm64
-          docker  search   ${{env.IMAGE_NAME}}:arm64
+
+      # arm64 에뮬레이션 - QEmu 
+      - name: setup QEMU
+        uses: docker/setup-qemu-action@v3 
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          #platforms: linux/amd64,linux/arm64/v8,linux/arm64/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
+          push: true
+          load: false
+          tags: |
+            ${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max          
+
+      - name: check image
+        run: |
+          docker image ls
 
       - name: logout from docker hub
         if: always()
-        run: docker logout    
-
+        run: docker logout   
 
   upload_compose:
-    needs: hub_push
+    needs: build_image
     runs-on: ubuntu-22.04
 
     steps:
@@ -99,7 +69,7 @@ jobs:
         with:
           host: ${{ env.HOSTNAME }}
           username: ${{ env.USERNAME }}
-          key: ${{ secrets.EC2_PRIVATEKEY }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           source: "compose-multijobs.yaml"
           target: "/home/${{ env.USERNAME }}"
@@ -110,21 +80,19 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-
       - name: deploy on EC2
         uses: appleboy/ssh-action@master 
         with: 
           host: ${{ env.HOSTNAME }}
           username: ${{ env.USERNAME }}
-          key: ${{ secrets.EC2_PRIVATEKEY }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           script: |
             docker compose -f ./compose-multijobs.yaml down  
             docker image rm -f siestageek/massai_mara
             docker compose -f ./compose-multijobs.yaml up -d
-
             sleep 15
           
             docker compose -f ./compose-multijobs.yaml ps
             docker compose -f ./compose-multijobs.yaml logs
-        
+  
