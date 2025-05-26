@@ -120,7 +120,7 @@ jobs:
           port: 22
           script: |
             docker compose -f ./compose-multijobs.yaml down  
-            docker image rm -f siestageek/massai_mara
+            docker image rm -f cj001j/massai_mara
             docker compose -f ./compose-multijobs.yaml up -d
 
             sleep 15
